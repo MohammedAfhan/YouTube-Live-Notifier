@@ -10,7 +10,7 @@ const app = express();
 
 const port = process.env.PORT || 3000;
 
-// Directly define your API keys and secrets here
+// Your credentials
 
 const API_KEY = 'AIzaSyCTq8lU35ZZc1h0xhFF_rxvt_XW2DNkKwA';  // Your YouTube API key
 
@@ -28,19 +28,35 @@ const client = new Client({
 
 client.on('qr', (qr) => {
 
+    console.log('[QR] QR Code received. Please scan it using your WhatsApp mobile app.');
+
     qrcode.generate(qr, { small: true });
 
 });
 
 client.on('ready', () => {
 
-    console.log('WhatsApp bot is ready!');
+    console.log('[WhatsApp] Bot is ready and connected to WhatsApp!');
 
 });
 
-// Function to check if the channel is live
+client.on('auth_failure', (msg) => {
+
+    console.error('[WhatsApp] Authentication failure:', msg);
+
+});
+
+client.on('disconnected', (reason) => {
+
+    console.log('[WhatsApp] Disconnected from WhatsApp:', reason);
+
+});
+
+// Function to check if the YouTube channel is live
 
 async function isChannelLive() {
+
+    console.log('[YouTube] Checking if channel is live...');
 
     try {
 
@@ -54,19 +70,25 @@ async function isChannelLive() {
 
         if (items && items.length > 0) {
 
+            console.log('[YouTube] Channel is LIVE!');
+
             const videoId = items[0].id.videoId;
 
             const liveUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
             return liveUrl;
 
-        }
+        } else {
 
-        return null;
+            console.log('[YouTube] Channel is NOT live.');
+
+            return null;
+
+        }
 
     } catch (error) {
 
-        console.error('Error checking YouTube live status:', error.message);
+        console.error('[YouTube] Error checking live status:', error.message);
 
         return null;
 
@@ -78,15 +100,19 @@ async function isChannelLive() {
 
 async function sendWhatsAppMessage(liveUrl) {
 
+    console.log('[WhatsApp] Preparing to send WhatsApp message...');
+
     try {
 
         const chats = await client.getChats();
+
+        console.log(`[WhatsApp] Total chats fetched: ${chats.length}`);
 
         const group = chats.find(chat => chat.name === COMMUNITY_NAME);
 
         if (!group) {
 
-            console.error(`Community "${COMMUNITY_NAME}" not found!`);
+            console.error(`[WhatsApp] Community "${COMMUNITY_NAME}" not found!`);
 
             return;
 
@@ -96,11 +122,11 @@ async function sendWhatsAppMessage(liveUrl) {
 
         await group.sendMessage(message);
 
-        console.log('Notification sent to WhatsApp Community.');
+        console.log('[WhatsApp] Notification sent successfully to WhatsApp Community.');
 
     } catch (error) {
 
-        console.error('Error sending WhatsApp message:', error.message);
+        console.error('[WhatsApp] Error sending message:', error.message);
 
     }
 
@@ -109,6 +135,8 @@ async function sendWhatsAppMessage(liveUrl) {
 // Route for checking live status and sending a message
 
 app.get('/checklive', async (req, res) => {
+
+    console.log('[HTTP] /checklive endpoint hit.');
 
     const liveUrl = await isChannelLive();
 
@@ -126,20 +154,22 @@ app.get('/checklive', async (req, res) => {
 
 });
 
-// Add a root route to handle visits to the root URL
+// Root route for basic health check
 
 app.get('/', (req, res) => {
+
+    console.log('[HTTP] / (root) endpoint hit.');
 
     res.send('Welcome to the Live YouTube Notification Bot!');
 
 });
 
-// Initialize WhatsApp client and start server
+// Initialize WhatsApp client and start the server
 
 client.initialize();
 
 app.listen(port, () => {
 
-    console.log(`Server running at http://localhost:${port}`);
+    console.log(`[Server] Server is running at http://localhost:${port}`);
 
 });
