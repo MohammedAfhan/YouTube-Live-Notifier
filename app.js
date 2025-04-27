@@ -1,5 +1,3 @@
-require('dotenv').config();  // To load environment variables from a .env file
-
 const express = require('express');
 
 const { Client, LocalAuth } = require('whatsapp-web.js');
@@ -8,17 +6,17 @@ const qrcode = require('qrcode-terminal');
 
 const axios = require('axios');
 
-// Configuration (from environment variables)
-
-const API_KEY = process.env.YOUTUBE_API_KEY;  // Replace with your YouTube API key in the environment
-
-const CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;    // Replace with your YouTube Channel ID in the environment
-
-const COMMUNITY_NAME = process.env.WHATSAPP_COMMUNITY_NAME; // Replace with your WhatsApp community name in the environment
-
 const app = express();
 
 const port = process.env.PORT || 3000;  // Will use Render's default port for cloud
+
+// Directly define your API keys and secrets here
+
+const API_KEY = 'AIzaSyCTq8lU35ZZc1h0xhFF_rxvt_XW2DNkKwA';  // Your YouTube API key
+
+const CHANNEL_ID = 'UCf60xw0hhkKnWqgf67z41qw';  // Your YouTube Channel ID
+
+const COMMUNITY_NAME = 'Majlis-e-Zikrullah'; // Your WhatsApp community name
 
 // Initialize WhatsApp Client
 
